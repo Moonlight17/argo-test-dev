@@ -11,9 +11,9 @@ spec:
     namespace: argocd
   source:
     path   : "apps"
-    repoURL: "https://github.com/Moonlight17/argo-test-dev.git"
+    repoURL: "git@github.com:Moonlight17/argo-test-dev.git"
     targetRevision: HEAD
-  project: default
+  project: system
   syncPolicy:
     automated:
       prune   : true
