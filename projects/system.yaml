@@ -8,9 +8,6 @@ spec:
     - name: Dev Cluster
       namespace: mysql
       server: https://kubernetes.default.svc
-    - name: Dev Cluster
-      namespace: argocd
-      server: https://kubernetes.default.svc
   namespaceResourceBlacklist:
     - group: '*'
       kind: '*'
