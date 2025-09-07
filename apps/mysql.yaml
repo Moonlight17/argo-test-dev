@@ -10,6 +10,7 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - Replace=true  # Добавьте эту опцию!
   project: system
   source:
     path: .
