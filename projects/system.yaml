@@ -8,7 +8,7 @@ spec:
     - name: Dev Cluster
       namespace: mysql
       server: https://kubernetes.default.svc
-  namespaceResourceBlacklist:
+  clusterResourceWhitelist:
     - group: '*'
       kind: '*'
   sourceRepos:
