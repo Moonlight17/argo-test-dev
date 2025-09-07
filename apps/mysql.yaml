@@ -68,7 +68,7 @@ spec:
               cpu: 2
               memory: 1Gi
         metrics:
-          enabled: true
+          enabled: false
           serviceMonitor:
             enabled: true
           prometheusRule:
