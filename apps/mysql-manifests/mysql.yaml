@@ -4,6 +4,12 @@ metadata:
   name: mysql
   namespace: argocd
 spec:
+  syncPolicy:
+    automated:
+      prune   : true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
   project: system
   source:
     path: .
