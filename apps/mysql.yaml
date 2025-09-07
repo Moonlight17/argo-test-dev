@@ -11,7 +11,7 @@ spec:
     targetRevision: "11.1.14"
     helm:
       valueFiles:
-      - ../manifests/mysql-manifests/values_dev.yaml
+      - mysql-manifests/values_dev.yaml
   destination:
     name: "Dev Cluster"
     namespace: mysql
