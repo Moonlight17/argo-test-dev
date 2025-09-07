@@ -20,7 +20,6 @@ spec:
       - name: "container.image"
         value: adv4000/app2:v2
 
-  project: prod
   syncPolicy:
     automated:
       prune   : true
