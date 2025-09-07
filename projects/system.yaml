@@ -17,6 +17,6 @@ spec:
   sourceRepos:
     - git@github.com:Moonlight17/argo-test-dev.git
     - oci://registry-1.docker.io/bitnamicharts/mysql
-  # sourceNamespaces: 
-  #   - mysql
-  #   - argocd
+  sourceNamespaces: 
+    - mysql
+    - argocd
