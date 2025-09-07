@@ -17,100 +17,99 @@ spec:
     targetRevision: "11.1.14"
     helm:
       valuesObject:
-      primary:
-        configuration: |-
-          [mysqld]
-          authentication_policy='* ,,'
-          skip-name-resolve
-          explicit_defaults_for_timestamp
-          basedir=/opt/bitnami/mysql
-          plugin_dir=/opt/bitnami/mysql/lib/plugin
-          port=3306
-          mysqlx=0
-          mysqlx_port=33060
-          socket=/opt/bitnami/mysql/tmp/mysql.sock
-          datadir=/bitnami/mysql/data
-          tmpdir=/opt/bitnami/mysql/tmp
-          bind-address=*
-          pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
-          log-error=/opt/bitnami/mysql/logs/mysqld.log
-          character-set-server=UTF8
-          slow_query_log=0
-          long_query_time=10.0
-          max_allowed_packet=64M
-          innodb_buffer_pool_size=15G
-          wait_timeout=14400
-          interactive_timeout=14400
-          net_read_timeout=60
-          net_write_timeout=60
-          binlog_expire_logs_seconds=604800
-          max_connections=700
+        primary:
+          configuration: |-
+            [mysqld]
+            authentication_policy='* ,,'
+            skip-name-resolve
+            explicit_defaults_for_timestamp
+            basedir=/opt/bitnami/mysql
+            plugin_dir=/opt/bitnami/mysql/lib/plugin
+            port=3306
+            mysqlx=0
+            mysqlx_port=33060
+            socket=/opt/bitnami/mysql/tmp/mysql.sock
+            datadir=/bitnami/mysql/data
+            tmpdir=/opt/bitnami/mysql/tmp
+            bind-address=*
+            pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
+            log-error=/opt/bitnami/mysql/logs/mysqld.log
+            character-set-server=UTF8
+            slow_query_log=0
+            long_query_time=10.0
+            max_allowed_packet=64M
+            innodb_buffer_pool_size=15G
+            wait_timeout=14400
+            interactive_timeout=14400
+            net_read_timeout=60
+            net_write_timeout=60
+            binlog_expire_logs_seconds=604800
+            max_connections=700
 
-          [client]
-          port=3306
-          socket=/opt/bitnami/mysql/tmp/mysql.sock
-          default-character-set=UTF8
-          plugin_dir=/opt/bitnami/mysql/lib/plugin
+            [client]
+            port=3306
+            socket=/opt/bitnami/mysql/tmp/mysql.sock
+            default-character-set=UTF8
+            plugin_dir=/opt/bitnami/mysql/lib/plugin
 
-          [manager]
-          port=3306
-          socket=/opt/bitnami/mysql/tmp/mysql.sock
-          pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
-        service:
-          type: LoadBalancer
-        persistence:
-          size: 300Gi  
-        resources:
-          requests:
-            cpu: 4
-            memory: 5Gi
-          limits:
-            cpu: 6
-            memory: 15Gi
-      metrics:
-        enabled: true
-        serviceMonitor:
+            [manager]
+            port=3306
+            socket=/opt/bitnami/mysql/tmp/mysql.sock
+            pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
+          service:
+            type: LoadBalancer
+          persistence:
+            size: 30Gi  
+          resources:
+            requests:
+              cpu: 1
+              memory: 0.5Gi
+            limits:
+              cpu: 2
+              memory: 1Gi
+        metrics:
           enabled: true
-        prometheusRule:
-          enabled: true
-          additionalLabels:
-            service: mysql
-            namespace: mysql
-          rules:
-            - alert: MySQLHighDiskUsage
-              expr: kubelet_volume_stats_used_bytes{persistentvolumeclaim=~".*-mysql-.*"} / kubelet_volume_stats_capacity_bytes{persistentvolumeclaim=~".*-mysql-.*"} * 100 > 80
-              for: 5m
-              labels:
-                service: mysql
-                severity: warning
-                namespace: mysql
-                responsibility: devops
-              annotations:
-                summary: "MySQL disk usage is over 80%"
-                description: "MySQL is using more than 80% of the available disk space on /var/lib/mysql."
-            - alert: MySQLDown
-              expr: absent(mysql_up{job=~"mysql-.*"} == 1 )
-              for: 5m
-              labels:
-                service: mysql
-                severity: critical
-                namespace: mysql
-                responsibility: devops
-              annotations:
-                summary: "MySQL service is down"
-                description: "MySQL service is not responding or down. <!subteam^S07LYJR87CK>"
-            - alert: MySQLSlowQueries
-              expr: rate(mysql_global_status_slow_queries{job=~"mysql-.*"}[5m]) > 0.05
-              for: 10m
-              labels:
-                service: mysql
-                severity: warning
-                namespace: mysql
-                responsibility: devops
-              annotations:
-                summary: "High number of slow queries"
-                description: "MySQL is experiencing more than 0.05 slow queries per second."
-
+          serviceMonitor:
+            enabled: true
+          prometheusRule:
+            enabled: true
+            additionalLabels:
+              service: mysql
+              namespace: mysql
+            rules:
+              - alert: MySQLHighDiskUsage
+                expr: kubelet_volume_stats_used_bytes{persistentvolumeclaim=~".*-mysql-.*"} / kubelet_volume_stats_capacity_bytes{persistentvolumeclaim=~".*-mysql-.*"} * 100 > 80
+                for: 5m
+                labels:
+                  service: mysql
+                  severity: warning
+                  namespace: mysql
+                  responsibility: devops
+                annotations:
+                  summary: "MySQL disk usage is over 80%"
+                  description: "MySQL is using more than 80% of the available disk space on /var/lib/mysql."
+              - alert: MySQLDown
+                expr: absent(mysql_up{job=~"mysql-.*"} == 1 )
+                for: 5m
+                labels:
+                  service: mysql
+                  severity: critical
+                  namespace: mysql
+                  responsibility: devops
+                annotations:
+                  summary: "MySQL service is down"
+                  description: "MySQL service is not responding or down. <!subteam^S07LYJR87CK>"
+              - alert: MySQLSlowQueries
+                expr: rate(mysql_global_status_slow_queries{job=~"mysql-.*"}[5m]) > 0.05
+                for: 10m
+                labels:
+                  service: mysql
+                  severity: warning
+                  namespace: mysql
+                  responsibility: devops
+                annotations:
+                  summary: "High number of slow queries"
+                  description: "MySQL is experiencing more than 0.05 slow queries per second."
   destination:
     name: "Dev Cluster"
     namespace: mysql
