@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mysql
+  namespace: argocd
+spec:
+  project: system
+  source:
+    path: .
+    repoURL: oci://registry-1.docker.io/bitnamicharts/mysql
+    targetRevision: "11.1.14"
+    helm:
+      valueFiles:
+      - ../manifests/mysql-manifests/values_dev.yaml
+  destination:
+    name: "Dev Cluster"
+    namespace: mysql
+  syncPolicy:
+    automated:
+      prune   : true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
