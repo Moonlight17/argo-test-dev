@@ -114,9 +114,3 @@ spec:
   destination:
     name: "Dev Cluster"
     namespace: mysql
-  syncPolicy:
-    automated:
-      prune   : true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
