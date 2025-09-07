@@ -10,7 +10,7 @@ spec:
     name     : Dev Cluster
     namespace: argocd
   source:
-    path   : "apps"
+    path   : "manifests"
     repoURL: "https://github.com/Moonlight17/argo-test-dev.git"
     targetRevision: HEAD
   project: default
