@@ -1,16 +1,15 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: mysql
+  name: mysql-2
+  namespace: argocd
 spec:
   project: system
   source:
     path: .
     repoURL: oci://registry-1.docker.io/bitnamicharts/mysql
     targetRevision: "11.1.14"
-    helm:
-      valueFiles:
-      - values_dev.yaml
+    helm: []
   destination:
     name: "Dev Cluster"
     namespace: mysql
