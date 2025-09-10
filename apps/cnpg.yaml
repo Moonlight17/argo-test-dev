@@ -1,0 +1,167 @@
+kind: Cluster
+metadata:
+  name: linkedin
+  namespace: cnpg
+  annotations:
+    argocd.argoproj.io/sync-wave: "3" # (1)
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true # (2)
+spec:
+  instances: 1
+# Monitoring 
+  monitoring:
+    enablePodMonitor: true
+# Security
+  enableSuperuserAccess: true
+
+  postgresql:
+    parameters:
+      bgwriter_delay: 200ms
+      bgwriter_flush_after: '0'
+      bgwriter_lru_maxpages: '100'
+      bgwriter_lru_multiplier: '2.0'
+      checkpoint_completion_target: '0.9'
+      default_statistics_target: '500'
+      effective_cache_size: 6GB
+      effective_io_concurrency: '300'
+      enable_partitionwise_aggregate: 'on'
+      enable_partitionwise_join: 'on'
+      jit: 'on'
+      maintenance_io_concurrency: '300'
+      maintenance_work_mem: 1GB
+      max_connections: '1000'
+      max_parallel_maintenance_workers: '2'
+      max_parallel_workers: '4'
+      max_parallel_workers_per_gather: '2'
+      max_replication_slots: '32'
+      max_slot_wal_keep_size: 1000MB
+      max_wal_size: 16GB
+      max_worker_processes: '4'
+      min_wal_size: 4GB
+      random_page_cost: '1.1'
+      shared_buffers: 2GB
+      superuser_reserved_connections: '3'
+      track_functions: pl
+      track_io_timing: 'on'
+      track_wal_io_timing: 'on'
+      wal_buffers: '-1'
+      wal_compression: 'on'
+      wal_recycle: 'on'
+      wal_writer_delay: 200ms
+      wal_writer_flush_after: 1MB
+      work_mem: 524kB
+    pg_hba:
+      - host all all all scram-sha-256
+
+# Storage
+  storage:
+    resizeInUseVolumes: true
+    size: 220Gi
+
+# Service
+  managed:
+    services:
+      disabledDefaultServices: ["ro", "r"]
+      additional:
+      - selectorType: rw
+        serviceTemplate:
+          metadata:
+            name: linkedin
+          spec:
+            type: LoadBalancer
+# Base DB
+  bootstrap:
+    recovery:
+      backup:
+        name: linkedin-backup-20250327020000
+      database: develop
+      owner: develop
+
+# Backup
+  backup:
+    retentionPolicy: "7d"
+    barmanObjectStore:
+      destinationPath: s3://backups-buckets/cnpg-linkedin-dev/
+      serverName: "recoveredDevCluster"
+      endpointURL: https://s3.sbg.io.cloud.ovh.net
+      s3Credentials:
+        accessKeyId:
+          name: backups
+          key: access_key
+        secretAccessKey:
+          name: backups
+          key: secret_key
+      data:
+        compression: gzip
+        encryption: AES256
+        immediateCheckpoint: false
+        jobs: 7
+      tags:
+        backupRetentionPolicy: "expire"
+      historyTags:
+        backupRetentionPolicy: "keep"
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: linkedin-backup
+  namespace: cnpg
+spec:
+  schedule: "0 0 2 * * *"
+  immediate: true
+  backupOwnerReference: self
+  cluster:
+    name: linkedin
+
+          configuration: |-
+            [mysqld]
+            authentication_policy='* ,,'
+            skip-name-resolve
+            explicit_defaults_for_timestamp
+            basedir=/opt/bitnami/mysql
+            plugin_dir=/opt/bitnami/mysql/lib/plugin
+            port=3306
+            mysqlx=0
+            mysqlx_port=33060
+            socket=/opt/bitnami/mysql/tmp/mysql.sock
+            datadir=/bitnami/mysql/data
+            tmpdir=/opt/bitnami/mysql/tmp
+            bind-address=*
+            pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
+            log-error=/opt/bitnami/mysql/logs/mysqld.log
+            character-set-server=UTF8
+            slow_query_log=0
+            long_query_time=10.0
+            max_allowed_packet=64M
+            innodb_buffer_pool_size=15G
+            wait_timeout=14400
+            interactive_timeout=14400
+            net_read_timeout=60
+            net_write_timeout=60
+            binlog_expire_logs_seconds=604800
+            max_connections=700
+
+            [client]
+            port=3306
+            socket=/opt/bitnami/mysql/tmp/mysql.sock
+            default-character-set=UTF8
+            plugin_dir=/opt/bitnami/mysql/lib/plugin
+
+            [manager]
+            port=3306
+            socket=/opt/bitnami/mysql/tmp/mysql.sock
+            pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
+          service:
+            type: LoadBalancer
+          persistence:
+            size: 30Gi  
+          resources:
+            requests:
+              cpu: 1
+              memory: 0.5Gi
+            limits:
+              cpu: 2
+              memory: 2Gi
+
+  destination:
+    name: "Dev Cluster"
+    namespace: mysql
